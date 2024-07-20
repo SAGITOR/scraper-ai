@@ -70,13 +70,13 @@ class Scraper:
                         })
 
                         self.__save_json("papers_information.json", self.output_json)
-                        
+
                     except Exception as error:
                         traceback.print_exc()
                         self.__error_handler(error, doi)
                         print(f"Paper URL with Error: {doi} enviado a to_fixed.json")
                         self.to_fixed.append(doi)
-                        self.__save_json("to_fixed", self.to_fixed)
+                        self.__save_json("to_fixed.json", self.to_fixed)
 
                     process_bar(1)
         except:

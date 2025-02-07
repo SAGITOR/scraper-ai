@@ -12,9 +12,23 @@ class Scraper:
     def __init__( self ):
         self.to_fixed = []
         self.output_json = []
-        self.driver = webdriver.Chrome()
         self.papers_ai_client = PapersAI()
-        self.dois_file_path = "./results/dois.json"
+        #self.dois_file_path = "./results/dois.json"
+        self.dois_file_path = "./results/to_fixed_complete.json"
+
+        options = webdriver.ChromeOptions()
+
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument('--disable-extensions')
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option('useAutomationExtension', False)
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-infobars')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-browser-side-navigation')
+        options.add_argument('--disable-gpu')
+
+        self.driver = webdriver.Chrome(options = options)
 
     def execute( self ):
         print("\nCreating error.logs file\n")
@@ -24,47 +38,48 @@ class Scraper:
             print("     error.logs file created")
 
         try:
+            not_found = []
             dois_file = open(self.dois_file_path)
             dois = json.load(dois_file)
 
             with alive_bar( len(dois), bar = "blocks", title = "Starting process..." ) as process_bar:
                 for doi in dois:
-                    paper_text_content = []
 
                     process_bar.title(f"Scraping Paper URL: {doi}")
                     self.driver.get(doi)
                     self.__humanizaitor(4.5, 5.3)
 
                     try:
-                        html_main_component = self.driver.find_element(By.TAG_NAME, "html")
-
-                        titles = list(html_main_component.find_elements(By.TAG_NAME, "h1")) + list(self.driver.find_elements(By.TAG_NAME, "h2")) + list(self.driver.find_elements(By.TAG_NAME, "h3"))
+                        html_main_component = self.driver.find_element(By.TAG_NAME, "html").text[:8000]
                         
-                        for text_page in titles:
-                            if ( len(text_page.text.split(" ")) >= 4 ):
-                                paper_text_content.append(text_page.text.strip())
+                        # for div in html_main_component.find_elements(By.TAG_NAME, "div"):
+                        #     print(div.text)
+         
+                        if ( "Verifique que usted es un ser humano completando la acción a continuación." in html_main_component ):
+                            self.__humanizaitor(30, 45)
+                            html_main_component = self.driver.find_element(By.TAG_NAME, "html").text[:8000]
+                        elif ( "DOI NOT FOUND" in html_main_component ):
+                            print(f"Paper URL: {doi} enviado a not_found.json")
+                            not_found.append(doi)
+                            self.__save_json("not_found.json", not_found)
+                            process_bar(1)
+                            continue
 
-                        for text_page in html_main_component.find_elements(By.TAG_NAME, "p"):
-                            if ( ( len(text_page.text.split(" ")) >= 100 ) and  ( len(text_page.text.split(" ")) <= 300 ) ):
-                                paper_text_content.append(text_page.text.strip())
-
-                        for text_page in html_main_component.find_elements(By.TAG_NAME, "span"):
-                            if ( ( text_page.text.strip() not in paper_text_content ) and ( len(text_page.text.strip()) > 1 ) and ( len(text_page.text.split(" ")) <= 3 ) ):
-                                paper_text_content.append(text_page.text.strip())
-
-                        paper_text_content = "\n".join(paper_text_content)
-                        if ( len(paper_text_content.split(" ")) <= 80 ):
+                        if ( len(html_main_component.split(" ")) <= 80 ):
                             print(f"Paper URL: {doi} enviado a to_fixed.json")
                             self.to_fixed.append(doi)
                             self.__save_json("to_fixed.json", self.to_fixed)
+                            process_bar(1)
                             continue
                     
-                        parse_paper_content = self.papers_ai_client.execute(paper_text_content)
-        
+                        parse_paper_content = self.papers_ai_client.execute(html_main_component)
+
+                        print(parse_paper_content)
+
                         self.output_json.append({
-                            "titulo": parse_paper_content[0].strip(),
-                            "abstract": parse_paper_content[1].strip(),
-                            "autores": parse_paper_content[2].strip(),
+                            "titulo": parse_paper_content[0].strip() if parse_paper_content[0] != "null" else None,
+                            "abstract": parse_paper_content[1].strip() if parse_paper_content[1] != "null" else None,
+                            "autores": parse_paper_content[2].strip() if parse_paper_content[2] != "null" else None,
                             "keywords": parse_paper_content[3].strip() if parse_paper_content[3] != "null" else None,
                             "url": doi
                         })

@@ -1,1 +1,2 @@
-Start at: 2024-07-19 23:41:36.749256
+Start at: 2024-08-06 10:56:02.788288
+Date: 2024-08-06 11:00:27.722840 - Paper URL: https://doi.org/10.1016/j.eswa.2020.113506 - Error: list index out of range

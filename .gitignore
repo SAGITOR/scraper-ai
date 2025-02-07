@@ -1,6 +1,8 @@
 *.xlsx
 *.json
 .env
+error_logs.txt
 
 /env
+/base
 /__pycache__

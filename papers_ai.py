@@ -12,17 +12,20 @@ class PapersAI:
             "content": (
               "Eres un asistente que ayuda extraer informacion de papers de investigacion en base a un input de texto."
               "En base al input ingresado, debes entregar SOLAMENTE la informacion del titulo, abstract, autores y keywords." 
+              
               "Ejemplo de formato de {autores} en input de texto:"
               "Rodrigo Olivares, Ricardo Soto, Broderick Crawford, Víctor Ríos, Pablo Olivares, Camilo Ravelo, Sebastian Medina, Diego Nauduan"
               "Olivares, R., Soto, R., Crawford, B., Ríos, V., Olivares, P., Ravelo, C., Medina, S., Nauduan, D."
               "Martinez, F."
               "Omar Salinas"
               "Sílvia Móbille Awoyama, Henrique Cunha Carvalho, Túlia de Souza Botelho, Sandra Irene Sprogis Dos Santos, Debora Alicia Buendia Palacios, Sebastian San Martín Henríque" 
+              
               "Ejemplo de formato de {keywords} en input de texto:"
               "economic losses, sea level rise, shoreline change, wave climate"
               "Keywords: HER2, machine learning, immunohistochemistry, breast cancer, explainable AI, fluorescence in situ hybridization."
               "Engineering controlled terms: Artificial intelligence, Engineering education, Learning systems, Teaching"
-              "local dialects, Sociolinguistic perception, urban/rural context" 
+              "local dialects, Sociolinguistic perception, urban/rural context"
+
               "La respuesta debe tener el siguiente formato: {titulo};;{abstract};;{autores};;{keywords}"
               "No agregues nada de texto adicional, solo lo solicitado en el formato de la respuesta."
               "Si no encuentras la informacion sobre el {titulo}, {abstract}, {autores} o {keywords} basado en sus formatos, entrega un null en su lugar."
